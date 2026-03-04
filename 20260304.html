@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="推播測試">
+<title>定時推播通知測試</title>
+
+<!-- PWA Manifest inline -->
+
+<link rel="manifest" id="manifest-placeholder">
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap');
+
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --surface2: #1a1a26;
+    --border: rgba(255,255,255,0.08);
+    --accent: #7c5cfc;
+    --accent2: #fc5c7d;
+    --text: #f0f0ff;
+    --text-dim: rgba(240,240,255,0.5);
+    --success: #4ade80;
+    --warning: #fb923c;
+    --error: #f87171;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans TC', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100dvh;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: -30%;
+    left: -20%;
+    width: 60%;
+    height: 60%;
+    background: radial-gradient(ellipse, rgba(124,92,252,0.15) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    bottom: -20%;
+    right: -20%;
+    width: 50%;
+    height: 50%;
+    background: radial-gradient(ellipse, rgba(252,92,125,0.10) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 24px 20px 40px;
+  }
+
+  header {
+    text-align: center;
+    padding: 32px 0 24px;
+  }
+
+  .icon-wrap {
+    width: 72px;
+    height: 72px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 20px;
+    margin: 0 auto 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    box-shadow: 0 8px 32px rgba(124,92,252,0.4);
+    animation: pulse-glow 3s ease-in-out infinite;
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 8px 32px rgba(124,92,252,0.4); }
+    50% { box-shadow: 0 8px 48px rgba(124,92,252,0.7), 0 0 80px rgba(252,92,125,0.2); }
+  }
+
+  h1 {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, #fff 40%, rgba(255,255,255,0.6));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .subtitle {
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-top: 6px;
+    line-height: 1.5;
+  }
+
+  /* Status Banner */
+  .status-banner {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 13px;
+    transition: all 0.3s;
+  }
+
+  .status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    background: var(--text-dim);
+    transition: all 0.3s;
+  }
+  .status-dot.granted { background: var(--success); box-shadow: 0 0 8px rgba(74,222,128,0.6); animation: blink 2s infinite; }
+  .status-dot.denied { background: var(--error); }
+  .status-dot.pending { background: var(--warning); animation: blink 1s infinite; }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  /* iOS Guide */
+  .ios-guide {
+    background: linear-gradient(135deg, rgba(124,92,252,0.1), rgba(252,92,125,0.06));
+    border: 1px solid rgba(124,92,252,0.25);
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 20px;
+    display: none;
+  }
+
+  .ios-guide.visible { display: block; }
+
+  .ios-guide-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .ios-guide ol {
+    padding-left: 16px;
+    font-size: 12.5px;
+    color: var(--text-dim);
+    line-height: 1.9;
+  }
+
+  .ios-guide ol li { margin-bottom: 2px; }
+
+  /* Card */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+
+  .card-title {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text-dim);
+    margin-bottom: 14px;
+  }
+
+  /* Form Controls */
+  .field-group { margin-bottom: 14px; }
+
+  label {
+    display: block;
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+  }
+
+  input[type="text"],
+  input[type="number"],
+  textarea,
+  select {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 11px 14px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+  }
+
+  input:focus, textarea:focus, select:focus {
+    border-color: rgba(124,92,252,0.5);
+    box-shadow: 0 0 0 3px rgba(124,92,252,0.1);
+  }
+
+  textarea { resize: none; height: 70px; line-height: 1.5; }
+
+  .row { display: flex; gap: 10px; }
+  .row .field-group { flex: 1; }
+
+  /* Interval Grid */
+  .interval-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+
+  .interval-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 9px 6px;
+    color: var(--text-dim);
+    font-size: 12px;
+    font-family: 'Space Mono', monospace;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .interval-btn:active { transform: scale(0.95); }
+  .interval-btn.active {
+    background: linear-gradient(135deg, rgba(124,92,252,0.25), rgba(252,92,125,0.15));
+    border-color: rgba(124,92,252,0.5);
+    color: #fff;
+  }
+
+  /* Scheduled List */
+  .scheduled-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 240px;
+    overflow-y: auto;
+    padding-right: 2px;
+  }
+
+  .scheduled-list::-webkit-scrollbar { width: 4px; }
+  .scheduled-list::-webkit-scrollbar-track { background: transparent; }
+  .scheduled-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+
+  .schedule-item {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    animation: slide-in 0.3s ease;
+  }
+
+  @keyframes slide-in {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .schedule-time {
+    font-family: 'Space Mono', monospace;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--accent);
+    flex-shrink: 0;
+    min-width: 60px;
+  }
+
+  .schedule-info { flex: 1; min-width: 0; }
+  .schedule-title { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .schedule-meta { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+
+  .countdown-badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    background: rgba(124,92,252,0.15);
+    border: 1px solid rgba(124,92,252,0.3);
+    border-radius: 6px;
+    padding: 3px 7px;
+    color: var(--accent);
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+
+  .delete-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: rgba(248,113,113,0.1);
+    border: 1px solid rgba(248,113,113,0.2);
+    color: var(--error);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    font-size: 14px;
+    transition: all 0.2s;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .delete-btn:active { transform: scale(0.9); background: rgba(248,113,113,0.2); }
+
+  .empty-state {
+    text-align: center;
+    padding: 24px;
+    color: var(--text-dim);
+    font-size: 13px;
+  }
+
+  /* Buttons */
+  .btn {
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    border: none;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    -webkit-tap-highlight-color: transparent;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn:active { transform: scale(0.97); }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), #9d7cff);
+    color: #fff;
+    box-shadow: 0 4px 20px rgba(124,92,252,0.4);
+    margin-bottom: 10px;
+  }
+
+  .btn-secondary {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+  }
+
+  .btn:disabled { opacity: 0.45; pointer-events: none; }
+
+  .btn-test {
+    background: linear-gradient(135deg, rgba(252,92,125,0.2), rgba(252,92,125,0.1));
+    border: 1px solid rgba(252,92,125,0.3);
+    color: var(--accent2);
+    font-size: 13px;
+    padding: 11px;
+    margin-bottom: 0;
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: calc(env(safe-area-inset-bottom) + 24px);
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 20px;
+    font-size: 13px;
+    white-space: nowrap;
+    z-index: 999;
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    pointer-events: none;
+    backdrop-filter: blur(20px);
+  }
+
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.success { border-color: rgba(74,222,128,0.3); color: var(--success); }
+  .toast.error { border-color: rgba(248,113,113,0.3); color: var(--error); }
+
+  /* Divider */
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 14px 0;
+  }
+
+  select option { background: #1a1a26; }
+</style>
+
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <div class="icon-wrap">🔔</div>
+    <h1>定時推播通知測試</h1>
+    <p class="subtitle">iPhone PWA 本地通知排程工具</p>
+  </header>
+
+  <!-- iOS Install Guide -->
+
+  <div class="ios-guide" id="iosGuide">
+    <div class="ios-guide-title">📱 iPhone 安裝步驟（必要）</div>
+    <ol>
+      <li>點選 Safari 底部的「分享」按鈕 <strong>⎙</strong></li>
+      <li>向下滾動，選擇「加入主畫面」</li>
+      <li>點選右上角「新增」</li>
+      <li>從主畫面開啟此 App（非 Safari）</li>
+      <li>允許通知權限即可使用</li>
+    </ol>
+  </div>
+
+  <!-- Permission Status -->
+
+  <div class="status-banner" id="statusBanner">
+    <div class="status-dot" id="statusDot"></div>
+    <div id="statusText">正在檢查通知權限…</div>
+  </div>
+
+  <!-- Request Permission -->
+
+  <div class="card" id="permCard">
+    <div class="card-title">步驟 1 — 授權通知</div>
+    <button class="btn btn-primary" id="reqBtn" onclick="requestPermission()">🔔 請求通知權限</button>
+    <button class="btn btn-test" onclick="sendTestNow()">⚡ 立即測試一則通知</button>
+  </div>
+
+  <!-- Schedule Config -->
+
+  <div class="card">
+    <div class="card-title">步驟 2 — 設定通知內容</div>
+
+```
+<div class="field-group">
+  <label>通知標題</label>
+  <input type="text" id="notifTitle" value="提醒通知 🔔" placeholder="輸入標題">
+</div>
+
+<div class="field-group">
+  <label>通知內容</label>
+  <textarea id="notifBody" placeholder="輸入通知內容">這是一則定時推播測試通知！</textarea>
+</div>
+
+<div class="divider"></div>
+
+<div class="card-title">步驟 3 — 設定時間</div>
+
+<label>快速選擇間隔</label>
+<div class="interval-grid">
+  <button class="interval-btn" onclick="setInterval_(10)">10秒</button>
+  <button class="interval-btn" onclick="setInterval_(30)">30秒</button>
+  <button class="interval-btn" onclick="setInterval_(60)">1分</button>
+  <button class="interval-btn" onclick="setInterval_(300)">5分</button>
+</div>
+
+<div class="row">
+  <div class="field-group">
+    <label>延遲（秒後觸發）</label>
+    <input type="number" id="delaySeconds" value="10" min="5" max="3600" step="5">
+  </div>
+  <div class="field-group">
+    <label>重複次數</label>
+    <input type="number" id="repeatCount" value="1" min="1" max="20">
+  </div>
+</div>
+
+<div class="field-group">
+  <label>重複間隔（秒）</label>
+  <input type="number" id="repeatInterval" value="30" min="10" max="3600" step="10">
+</div>
+
+<button class="btn btn-primary" onclick="scheduleNotification()" id="scheduleBtn">
+  ➕ 新增排程通知
+</button>
+```
+
+  </div>
+
+  <!-- Scheduled List -->
+
+  <div class="card">
+    <div class="card-title">已排程通知 <span id="scheduleCount" style="color:var(--accent)"></span></div>
+    <div class="scheduled-list" id="scheduledList">
+      <div class="empty-state">尚未新增任何排程 🌙</div>
+    </div>
+    <div id="clearBtnWrap" style="display:none; margin-top:12px;">
+      <button class="btn btn-secondary" style="font-size:13px;padding:11px;" onclick="clearAll()">🗑 清除全部排程</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── State ──────────────────────────────────────────────
+const schedules = []; // { id, title, body, fireAt, timerId, repeat, repeatInterval, remaining }
+let countdownTimer = null;
+
+// ── PWA Manifest (inline) ──────────────────────────────
+(function injectManifest() {
+  const manifest = {
+    name: "推播通知測試",
+    short_name: "推播測試",
+    start_url: window.location.href,
+    display: "standalone",
+    background_color: "#0a0a0f",
+    theme_color: "#7c5cfc",
+    icons: [{
+      src: "data:image/svg+xml," + encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='40' fill='%237c5cfc'/><text y='130' x='96' text-anchor='middle' font-size='110'>🔔</text></svg>`),
+      sizes: "192x192",
+      type: "image/svg+xml"
+    }]
+  };
+  const blob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
+  document.getElementById('manifest-placeholder').href = URL.createObjectURL(blob);
+})();
+
+// ── Platform & Permission Check ────────────────────────
+function isIOS() {
+  return /iphone|ipad|ipod/i.test(navigator.userAgent);
+}
+
+function isStandalone() {
+  return window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+}
+
+function checkPermission() {
+  if (!('Notification' in window)) {
+    setStatus('pending', '此瀏覽器不支援通知 API');
+    if (isIOS() && !isStandalone()) showIOSGuide();
+    return;
+  }
+
+  const perm = Notification.permission;
+  if (perm === 'granted') {
+    setStatus('granted', '✅ 通知權限已授予，可以排程通知');
+    document.getElementById('reqBtn').textContent = '✅ 已授權';
+    document.getElementById('reqBtn').disabled = true;
+  } else if (perm === 'denied') {
+    setStatus('denied', '❌ 通知已被封鎖，請至設定手動開啟');
+  } else {
+    setStatus('pending', '⏳ 尚未授權，請點下方按鈕請求權限');
+    if (isIOS() && !isStandalone()) showIOSGuide();
+  }
+}
+
+function showIOSGuide() {
+  document.getElementById('iosGuide').classList.add('visible');
+}
+
+function setStatus(type, msg) {
+  const dot = document.getElementById('statusDot');
+  const text = document.getElementById('statusText');
+  dot.className = 'status-dot ' + type;
+  text.textContent = msg;
+}
+
+// ── Request Permission ──────────────────────────────────
+async function requestPermission() {
+  if (!('Notification' in window)) {
+    toast('此環境不支援通知', 'error');
+    if (isIOS()) showIOSGuide();
+    return;
+  }
+
+  if (isIOS() && !isStandalone()) {
+    showIOSGuide();
+    toast('請先加入主畫面再開啟', 'error');
+    return;
+  }
+
+  try {
+    const result = await Notification.requestPermission();
+    if (result === 'granted') {
+      setStatus('granted', '✅ 通知權限已授予，可以排程通知');
+      document.getElementById('reqBtn').textContent = '✅ 已授權';
+      document.getElementById('reqBtn').disabled = true;
+      toast('🎉 通知已授權！', 'success');
+    } else {
+      setStatus('denied', '❌ 通知已被拒絕');
+      toast('通知請求被拒絕', 'error');
+    }
+  } catch(e) {
+    toast('請求失敗：' + e.message, 'error');
+  }
+}
+
+// ── Test Now ────────────────────────────────────────────
+function sendTestNow() {
+  if (Notification.permission !== 'granted') {
+    toast('請先授予通知權限', 'error');
+    return;
+  }
+  const title = document.getElementById('notifTitle').value || '測試通知';
+  const body = document.getElementById('notifBody').value || '這是立即測試通知';
+  new Notification(title, { body, icon: '🔔', badge: '🔔' });
+  toast('✅ 通知已發送！', 'success');
+}
+
+// ── Set Interval Shortcut ───────────────────────────────
+function setInterval_(sec) {
+  document.getElementById('delaySeconds').value = sec;
+  document.querySelectorAll('.interval-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+}
+
+// ── Schedule Notification ──────────────────────────────
+function scheduleNotification() {
+  if (Notification.permission !== 'granted') {
+    toast('請先授予通知權限', 'error');
+    return;
+  }
+
+  const title = document.getElementById('notifTitle').value || '提醒通知';
+  const body = document.getElementById('notifBody').value || '定時通知觸發！';
+  const delay = parseInt(document.getElementById('delaySeconds').value) || 10;
+  const repeatCount = parseInt(document.getElementById('repeatCount').value) || 1;
+  const repeatInterval = parseInt(document.getElementById('repeatInterval').value) || 30;
+
+  const id = Date.now();
+  const fireAt = new Date(Date.now() + delay * 1000);
+
+  const entry = { id, title, body, fireAt, delay, repeatCount, repeatInterval, remaining: repeatCount, timers: [] };
+
+  // Schedule all repetitions
+  for (let i = 0; i < repeatCount; i++) {
+    const triggerAt = delay * 1000 + i * repeatInterval * 1000;
+    const tid = setTimeout(() => {
+      new Notification(title, { body: body + (repeatCount > 1 ? ` (${i+1}/${repeatCount})` : ''), icon: '🔔' });
+      entry.remaining = repeatCount - i - 1;
+      renderList();
+    }, triggerAt);
+    entry.timers.push(tid);
+  }
+
+  schedules.unshift(entry);
+  renderList();
+  toast(`⏰ 已排程！${delay}秒後觸發`, 'success');
+}
+
+// ── Delete Schedule ────────────────────────────────────
+function deleteSchedule(id) {
+  const idx = schedules.findIndex(s => s.id === id);
+  if (idx !== -1) {
+    schedules[idx].timers.forEach(t => clearTimeout(t));
+    schedules.splice(idx, 1);
+  }
+  renderList();
+  toast('已刪除', '');
+}
+
+// ── Clear All ──────────────────────────────────────────
+function clearAll() {
+  schedules.forEach(s => s.timers.forEach(t => clearTimeout(t)));
+  schedules.length = 0;
+  renderList();
+  toast('已清除全部排程', '');
+}
+
+// ── Render List ────────────────────────────────────────
+function renderList() {
+  const list = document.getElementById('scheduledList');
+  const count = document.getElementById('scheduleCount');
+  const clearWrap = document.getElementById('clearBtnWrap');
+
+  count.textContent = schedules.length > 0 ? `(${schedules.length})` : '';
+  clearWrap.style.display = schedules.length > 0 ? 'block' : 'none';
+
+  if (schedules.length === 0) {
+    list.innerHTML = '<div class="empty-state">尚未新增任何排程 🌙</div>';
+    return;
+  }
+
+  list.innerHTML = schedules.map(s => {
+    const now = Date.now();
+    const msDiff = s.fireAt - now;
+    let countdownStr = '';
+    if (msDiff > 0) {
+      const sec = Math.ceil(msDiff / 1000);
+      countdownStr = `<span class="countdown-badge">${sec}秒後</span>`;
+    } else if (s.remaining > 0) {
+      countdownStr = `<span class="countdown-badge">剩 ${s.remaining} 次</span>`;
+    } else {
+      countdownStr = `<span class="countdown-badge" style="color:var(--success);border-color:rgba(74,222,128,0.3)">已完成</span>`;
+    }
+
+    const timeStr = s.fireAt.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' });
+    const repeatStr = s.repeatCount > 1 ? ` · 重複 ${s.repeatCount} 次／間隔 ${s.repeatInterval}s` : '';
+
+    return `
+      <div class="schedule-item">
+        <div class="schedule-time">${timeStr}</div>
+        <div class="schedule-info">
+          <div class="schedule-title">${escHtml(s.title)}</div>
+          <div class="schedule-meta">${escHtml(s.body)}${repeatStr}</div>
+        </div>
+        ${countdownStr}
+        <div class="delete-btn" onclick="deleteSchedule(${s.id})">✕</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ── Countdown Ticker ────────────────────────────────────
+setInterval(renderList, 1000);
+
+// ── Toast ───────────────────────────────────────────────
+let toastTimer;
+function toast(msg, type) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show ' + (type || '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.classList.remove('show'); }, 2500);
+}
+
+// ── Init ────────────────────────────────────────────────
+checkPermission();
+</script>
+
+</body>
+</html>
