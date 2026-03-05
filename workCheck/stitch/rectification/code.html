@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+
+<html lang="zh-TW"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#ec5b13",
+                        "background-light": "#f8f6f6",
+                        "background-dark": "#221610",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen">
+<div class="max-w-3xl mx-auto pb-12">
+<!-- Header -->
+<header class="sticky top-0 z-10 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-primary/10 px-4 py-4 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<button class="p-2 hover:bg-primary/10 rounded-full transition-colors">
+<span class="material-icons text-primary">arrow_back</span>
+</button>
+<h1 class="text-xl font-bold tracking-tight">缺失改善處置</h1>
+</div>
+<span class="bg-primary/10 text-primary text-xs font-semibold px-2.5 py-1 rounded-full uppercase">待處置</span>
+</header>
+<main class="p-4 space-y-6">
+<!-- Basic Info Section -->
+<section class="bg-white dark:bg-slate-800/50 rounded-xl p-5 shadow-sm border border-primary/5">
+<div class="grid grid-cols-2 gap-4">
+<div class="space-y-1">
+<label class="text-xs font-medium text-slate-500 dark:text-slate-400">系統別</label>
+<div class="relative">
+<select class="w-full bg-slate-50 dark:bg-slate-900 border-none rounded-lg text-sm font-medium py-2.5 opacity-80 appearance-none" disabled="">
+<option>機電工程系統</option>
+</select>
+<span class="material-icons absolute right-2 top-2.5 text-slate-400 text-sm">lock</span>
+</div>
+</div>
+<div class="space-y-1">
+<label class="text-xs font-medium text-slate-500 dark:text-slate-400">缺失單號/樓層</label>
+<div class="relative">
+<input class="w-full bg-slate-50 dark:bg-slate-900 border-none rounded-lg text-sm font-medium py-2.5 opacity-80" readonly="" type="text" value="NCR-20231027-04 / 12F"/>
+<span class="material-icons absolute right-2 top-2.5 text-slate-400 text-sm">lock</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Issue Details -->
+<section class="space-y-4">
+<div class="flex items-center gap-2 px-1">
+<span class="material-icons text-primary text-sm">error_outline</span>
+<h2 class="text-sm font-bold uppercase tracking-wider">缺失詳情 (Reporter Description)</h2>
+</div>
+<div class="bg-white dark:bg-slate-800/50 rounded-xl p-5 shadow-sm border border-primary/5 space-y-4">
+<div class="space-y-2">
+<p class="text-sm leading-relaxed text-slate-700 dark:text-slate-300">
+                            12樓南側管道間配線未整理，部分電纜外皮破損，需重新包覆並加裝保護軟管。
+                        </p>
+</div>
+<!-- Original Photos -->
+<div class="grid grid-cols-3 gap-2">
+<div class="aspect-square rounded-lg overflow-hidden relative group">
+<img class="w-full h-full object-cover" data-alt="Close up of messy electrical wiring" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAWznLRYs90fa_NBSusLv9xKQoLSNmXtMMBdy7Eg8QG3Y41fpiqSi4qxLLXFxCVMxzSnrCc-3_CeY1Q2wh2rwUIX3s1yKw1dxDJYgkdAXwYlgA0Axe56bK8wwkhnyH7V7k2RYkfU_4AI2oWxjoTq68bDqToa27f05VNOC242eLLXQlSmEWH5YfLNsxSbpkHMonlqQ8nZwJgtY-RL48zmLK1OPK_nz2IFRrdeGj-wFQ1oI_GheghdfS8Tm3eZW2f02DmcLMjMvb2IkQ"/>
+<div class="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors"></div>
+</div>
+<div class="aspect-square rounded-lg overflow-hidden relative group">
+<img class="w-full h-full object-cover" data-alt="Damaged cable insulation in building site" src="https://lh3.googleusercontent.com/aida-public/AB6AXuALcfe_SnapK1gZqqFd--a3Nx1dL03kgKGBPbuCXfPexmGXWicm-FIU2Iw5K6CpcQeYrF4YHCiovNgtPieYJPtqP2GavL-A8KJNzPnpnTVlZKjShe2qSBmGWWqozaS-UZavcExvphyijoEhj-fRalgEgk297sLT7flPXRvGxUrOt7vD4bmUZFLChfD7tSXnknNEbjLYsYryyuBhFim5AnzM-00BB8Ax54WVDIvThh14zw5HqaWEXVykf66SER6CGpTEccGZw2-se0M"/>
+<div class="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors"></div>
+</div>
+</div>
+<!-- Deadline & Penalty -->
+<div class="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-700">
+<div class="flex items-center gap-2">
+<span class="material-icons text-red-500 text-base">event_busy</span>
+<div class="flex flex-col">
+<span class="text-[10px] text-slate-400 uppercase">改善期限</span>
+<span class="text-sm font-bold text-red-500">2023-11-05</span>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-icons text-primary text-base">payments</span>
+<div class="flex flex-col text-right">
+<span class="text-[10px] text-slate-400 uppercase">罰款金額</span>
+<span class="text-sm font-bold">$ 2,000</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Subcontractor Input -->
+<section class="space-y-4 pt-4 border-t border-primary/10">
+<div class="flex items-center gap-2 px-1">
+<span class="material-icons text-primary text-sm">history_edu</span>
+<h2 class="text-sm font-bold uppercase tracking-wider">改善處置 (Subcontractor Action)</h2>
+</div>
+<div class="space-y-5">
+<!-- Action Description -->
+<div class="space-y-2">
+<label class="text-xs font-semibold text-slate-600 dark:text-slate-400 flex justify-between">
+                            處置內容說明
+                            <span class="text-primary">*必填</span>
+</label>
+<textarea class="w-full bg-white dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 rounded-xl focus:border-primary focus:ring-0 transition-colors text-sm placeholder:text-slate-400" placeholder="請描述已執行的改善措施..." rows="4"></textarea>
+</div>
+<!-- Photo Upload Grid -->
+<div class="space-y-2">
+<label class="text-xs font-semibold text-slate-600 dark:text-slate-400 flex justify-between">
+                            完成照片上傳
+                            <span class="text-slate-400 font-normal">上限 5 張</span>
+</label>
+<div class="grid grid-cols-4 sm:grid-cols-5 gap-3">
+<!-- Existing/Preview Photo -->
+<div class="aspect-square bg-slate-100 dark:bg-slate-800 rounded-lg relative overflow-hidden group">
+<img class="w-full h-full object-cover" data-alt="Neatly arranged electrical wires in conduit" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAhcUHCHPFsdDfBlABF69h3ChrQX5uUFzykCwkNK_wVMSI5tRlzlxJrBk-BsL3fAbK7DcOkYxzO-mHqHiBKu5pTWavSBIs7EE4jyuiAj8xvMYWbuyk1mVktU6lU3O_GbM0tQMbmnoWf_tjiBo8R7Z4wOfsaZySHTyzzEPW_KFuThCKwWT7GJ5DSgFdui2cZ6OTCO542os-ns-W792D8CWVkLPLDBtYoDkDkQ8X5C-G_4Bh6vsaTvh55OQ1R6yVmQf2168NthiH7BtU"/>
+<button class="absolute top-1 right-1 bg-black/60 text-white rounded-full p-0.5 hover:bg-red-500 transition-colors">
+<span class="material-icons text-[14px]">close</span>
+</button>
+</div>
+<!-- Upload Trigger -->
+<button class="aspect-square border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-lg flex flex-col items-center justify-center gap-1 hover:border-primary/50 hover:bg-primary/5 transition-all text-slate-400 hover:text-primary">
+<span class="material-icons">add_a_photo</span>
+<span class="text-[10px] font-medium">上傳</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Fixed Footer Action -->
+<footer class="fixed bottom-0 left-0 right-0 p-4 bg-background-light/90 dark:bg-background-dark/90 backdrop-blur-md max-w-3xl mx-auto">
+<button class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-4 rounded-xl shadow-lg shadow-primary/25 flex items-center justify-center gap-2 transition-transform active:scale-[0.98]">
+<span class="material-icons">task_alt</span>
+                確認回覆 (Confirm Reply)
+            </button>
+</footer>
+</div>
+</body></html>
