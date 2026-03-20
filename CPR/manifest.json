@@ -1,0 +1,18 @@
+{
+  "name": "CPR 姿勢訓練系統",
+  "short_name": "CPR Trainer",
+  "description": "即時 CPR 按壓姿勢辨識與訓練系統",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#080C0F",
+  "theme_color": "#FF2D2D",
+  "orientation": "landscape",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='32' fill='%23FF2D2D'/><path d='M96 160c-40-37-76-68-76-95C20 42 38 26 60 26c14 0 27 7 36 19C105 33 118 26 132 26c22 0 40 16 40 39 0 27-36 58-76 95z' fill='white'/></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    }
+  ],
+  "categories": ["education", "medical", "health"]
+}
