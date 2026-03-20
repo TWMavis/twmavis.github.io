@@ -98,8 +98,9 @@
   #videoEl {
     width: 100%; height: 100%;
     object-fit: cover;
-    transform: scaleX(-1);
   }
+  #videoEl.mirrored { transform: scaleX(-1); }
+  #poseCanvas.mirrored { transform: scaleX(-1); }
 
   #poseCanvas {
     position: absolute;
@@ -415,6 +416,19 @@
     </div>
   </div>
   <div class="header-right">
+    <button id="btnFlip" onclick="flipCamera()" style="
+      background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+      color: var(--text); padding: 6px 12px; cursor: pointer;
+      font-family: var(--font-display); font-size: 12px; font-weight: 600; letter-spacing: 1px;
+      display: flex; align-items: center; gap: 6px; transition: all 0.2s;
+    ">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+        <circle cx="12" cy="13" r="4"/>
+        <path d="M8 13h1M15 13h1" stroke-width="2.5"/>
+      </svg>
+      <span id="btnFlipLabel">後鏡頭</span>
+    </button>
     <span class="badge badge-offline" id="statusBadge">● 離線模式</span>
   </div>
 </header>
@@ -595,32 +609,71 @@ async function initMediaPipe() {
   setLoadingStatus('正在啟動攝影機...');
   loadingProgress(70);
 
+  await startCamera();
+
+  loadingProgress(100);
+  setLoadingStatus('系統就緒 ✓');
+  document.getElementById('statusBadge').textContent = '● 就緒';
+  document.getElementById('statusBadge').className = 'badge badge-ready';
+}
+
+// ============================================================
+// CAMERA MANAGEMENT
+// ============================================================
+let currentFacing = 'environment'; // 'user' = 前鏡頭, 'environment' = 後鏡頭
+let currentStream = null;
+
+async function startCamera() {
+  const videoEl = document.getElementById('videoEl');
+
+  // Stop existing stream
+  if (currentStream) {
+    currentStream.getTracks().forEach(t => t.stop());
+    currentStream = null;
+  }
+  if (camera) {
+    try { camera.stop(); } catch(e) {}
+    camera = null;
+  }
+
   try {
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
+    currentStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: currentFacing, width: { ideal: 1280 }, height: { ideal: 720 } }
     });
-    const videoEl = document.getElementById('videoEl');
-    videoEl.srcObject = stream;
+    videoEl.srcObject = currentStream;
     await videoEl.play();
+
+    // Mirror video + canvas for front camera only
+    const isFront = currentFacing === 'user';
+    videoEl.classList.toggle('mirrored', isFront);
+    canvas.classList.toggle('mirrored', isFront);
 
     camera = new Camera(videoEl, {
       onFrame: async () => {
-        if (sessionActive) {
-          await pose.send({ image: videoEl });
-        }
+        if (sessionActive) await pose.send({ image: videoEl });
       },
       width: 1280, height: 720
     });
     await camera.start();
-
-    loadingProgress(100);
-    setLoadingStatus('系統就緒 ✓');
-    document.getElementById('statusBadge').textContent = '● 就緒';
-    document.getElementById('statusBadge').className = 'badge badge-ready';
   } catch (err) {
     setLoadingStatus('⚠ 攝影機存取失敗：' + err.message);
     console.error(err);
   }
+}
+
+async function flipCamera() {
+  const btn = document.getElementById('btnFlip');
+  const label = document.getElementById('btnFlipLabel');
+  btn.style.opacity = '0.5';
+  btn.style.pointerEvents = 'none';
+
+  currentFacing = currentFacing === 'environment' ? 'user' : 'environment';
+  label.textContent = currentFacing === 'user' ? '前鏡頭 ✓' : '後鏡頭 ✓';
+
+  await startCamera();
+
+  btn.style.opacity = '1';
+  btn.style.pointerEvents = '';
 }
 
 function loadingProgress(pct) {
